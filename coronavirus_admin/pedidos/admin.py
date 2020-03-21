@@ -2,10 +2,14 @@
 from django.contrib import admin
 
 #Classe do projeto
-from pedidos.models import Pedido, Produto, CategoriaProduto, PedidoProduto, Endereco 
+from pedidos.models import Pedido, Produto, CategoriaProduto, PedidoProduto, Endereco, StatusPedido 
 
 # Register your models here.
 class CategoriaProdutoAdmin(admin.ModelAdmin):
+    list_display = ('descricao', )   
+    search_fields = ['descricao', ]
+    
+class StatusPedidoAdmin(admin.ModelAdmin):
     list_display = ('descricao', )   
     search_fields = ['descricao', ]
     
@@ -48,4 +52,5 @@ class PedidoAdmin(admin.ModelAdmin):
 admin.site.register(CategoriaProduto, CategoriaProdutoAdmin)
 admin.site.register(Produto, ProdutoAdmin)
 admin.site.register(Pedido, PedidoAdmin)
+admin.site.register(StatusPedido, StatusPedidoAdmin)
 
