@@ -32,7 +32,7 @@ class Produto(models.Model):
     descricao = models.CharField(max_length=100, verbose_name="Descrição")
     categoria = models.ForeignKey(CategoriaProduto, on_delete=models.PROTECT, related_name="categoria_produto")
     valor = models.FloatField()
-    imagem = models.ImageField(upload_to='empresas', blank=True, null=True)
+    imagem = models.ImageField(upload_to='produtos', blank=True, null=True)
     
     def __str__(self):
        return self.descricao
