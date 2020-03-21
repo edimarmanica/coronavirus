@@ -1,0 +1,31 @@
+Edimar
+-------
+
+- CRUD com Python e Django
+- Banco de Dados PostgreSql
+- Parte administrativa (lado da empresa)
+
+Daniel
+-------
+
+- Configurar o servidor na Amazon	
+- Configurar o BD
+- Ver sobre tecnologias (PHP, Java, Python...)
+
+Julio
+-------
+
+- Projeto das telas do cliente e da empresa.
+- Desenvolvimento das telas de pedido (projeto de design com dados fictícios).
+
+
+Serigne
+-------
+
+- Desenvolvimento das telas da empresa.
+
+Jorge
+-------
+
+- Desenvolvimento da API.
+
