@@ -51,8 +51,8 @@ class Pedido(models.Model):
     data = models.DateTimeField(verbose_name="Data/Hora do Pedido")
     valor_total = models.FloatField()
     horario_entrega = models.CharField(max_length=30, verbose_name="Horário de entrega", help_text="Descreva os horários disponíveis para você receber os produtos.")
-    observacao_cliente = models.TextField(verbose_name="Observação do Cliente")
-    observacao_funcionario = models.TextField(verbose_name="Observação do Funcionário")
+    observacao_cliente = models.TextField(verbose_name="Observação do Cliente", blank=True, null=True)
+    observacao_funcionario = models.TextField(verbose_name="Observação do Funcionário", blank=True, null=True)
         
     def __str__(self):
        return str(self.data) + " : " + self.cliente.nome

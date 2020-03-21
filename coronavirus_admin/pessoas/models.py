@@ -30,7 +30,7 @@ class Empresa(models.Model):
 
 class Cliente(models.Model):
     nome = models.CharField(max_length=50, verbose_name="Nome")
-    telefone = models.IntegerField(verbose_name="Telefone", unique=True)
+    telefone = models.BigIntegerField(verbose_name="Telefone", unique=True)
     sexo = models.IntegerField(choices=CHOICES_SEXO, verbose_name="Sexo")
     
     def __str__(self):
