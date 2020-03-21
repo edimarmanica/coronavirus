@@ -17,7 +17,7 @@ class FuncionarioAdmin(admin.ModelAdmin):
     search_fields = ['nome', ]    
 
 class ClienteAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'telefone') 
+    list_display = ('nome', 'telefone', 'sexo') 
     search_fields = ['nome', ]
 
     

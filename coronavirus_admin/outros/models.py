@@ -11,3 +11,4 @@ class Cidade(models.Model):
         ordering = ["nome", ] 
         verbose_name="Cidade" 
         verbose_name_plural="Cidades" 
+        

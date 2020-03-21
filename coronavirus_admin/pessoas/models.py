@@ -5,6 +5,13 @@ from django.contrib.auth.models import User
 #classes do projeto
 from outros.models import Cidade
 
+#choices
+CHOICES_SEXO = (
+  (0, "Masculino"),
+  (1, "Feminino"),
+  (2, "Outro")
+)
+
 # Create your models here.
 class Empresa(models.Model):
     nome_fantasia = models.CharField(max_length=30, verbose_name="Nome Fantasia")
@@ -24,6 +31,7 @@ class Empresa(models.Model):
 class Cliente(models.Model):
     nome = models.CharField(max_length=50, verbose_name="Nome")
     telefone = models.IntegerField(verbose_name="Telefone", unique=True)
+    sexo = models.IntegerField(choices=CHOICES_SEXO, verbose_name="Sexo")
     
     def __str__(self):
        return self.nome
