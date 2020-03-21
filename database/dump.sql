@@ -5,7 +5,7 @@
 -- Dumped from database version 9.5.19
 -- Dumped by pg_dump version 9.5.19
 
--- Started on 2020-03-21 12:11:36 -03
+-- Started on 2020-03-21 20:46:03 -03
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -26,13 +26,72 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- TOC entry 2407 (class 0 OID 0)
+-- TOC entry 2423 (class 0 OID 0)
 -- Dependencies: 1
 -- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
 --
 
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
+
+--
+-- TOC entry 220 (class 1255 OID 19000)
+-- Name: check_limite_produtos(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.check_limite_produtos() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+    BEGIN
+
+	/* Se adicionou um produto inativo ou alterou um produto para inativo, não precisa fazer nada */
+        IF NOT(NEW.ativo)  THEN
+           RETURN NEW;
+        END IF;
+        
+        /* Verificar se há sobreposição com agendamentos existentes */
+        IF  (SELECT (select emp.limite_produto
+		from pessoas_empresa emp
+		where id = NEW.EMPRESA_ID) < (select count(*)
+		from pedidos_produto
+		WHERE empresa_id = NEW.EMPRESA_ID
+		AND ativo='t'))
+        THEN
+            RAISE EXCEPTION 'O limite de produtos ativos disponibilizados para a sua empresa foi ultrapassado!';
+        END IF;
+        RETURN NEW;
+    END;
+$$;
+
+
+ALTER FUNCTION public.check_limite_produtos() OWNER TO postgres;
+
+--
+-- TOC entry 219 (class 1255 OID 18999)
+-- Name: teste(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.teste() RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+    BEGIN
+        
+        /* Verificar se há sobreposição com agendamentos existentes */
+        IF  (SELECT (select emp.limite_produto
+		from pessoas_empresa emp
+		where id = 1) < (select count(*)
+		from pedidos_produto
+		WHERE empresa_id = 1
+		AND ativo='t'))
+        THEN
+            RETURN 1;
+        END IF;
+        RETURN 2;
+    END;
+$$;
+
+
+ALTER FUNCTION public.teste() OWNER TO postgres;
 
 SET default_tablespace = '';
 
@@ -67,7 +126,7 @@ CREATE SEQUENCE public.auth_group_id_seq
 ALTER TABLE public.auth_group_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2408 (class 0 OID 0)
+-- TOC entry 2424 (class 0 OID 0)
 -- Dependencies: 187
 -- Name: auth_group_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -105,7 +164,7 @@ CREATE SEQUENCE public.auth_group_permissions_id_seq
 ALTER TABLE public.auth_group_permissions_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2409 (class 0 OID 0)
+-- TOC entry 2425 (class 0 OID 0)
 -- Dependencies: 189
 -- Name: auth_group_permissions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -144,7 +203,7 @@ CREATE SEQUENCE public.auth_permission_id_seq
 ALTER TABLE public.auth_permission_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2410 (class 0 OID 0)
+-- TOC entry 2426 (class 0 OID 0)
 -- Dependencies: 185
 -- Name: auth_permission_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -204,7 +263,7 @@ CREATE SEQUENCE public.auth_user_groups_id_seq
 ALTER TABLE public.auth_user_groups_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2411 (class 0 OID 0)
+-- TOC entry 2427 (class 0 OID 0)
 -- Dependencies: 193
 -- Name: auth_user_groups_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -228,7 +287,7 @@ CREATE SEQUENCE public.auth_user_id_seq
 ALTER TABLE public.auth_user_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2412 (class 0 OID 0)
+-- TOC entry 2428 (class 0 OID 0)
 -- Dependencies: 191
 -- Name: auth_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -266,7 +325,7 @@ CREATE SEQUENCE public.auth_user_user_permissions_id_seq
 ALTER TABLE public.auth_user_user_permissions_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2413 (class 0 OID 0)
+-- TOC entry 2429 (class 0 OID 0)
 -- Dependencies: 195
 -- Name: auth_user_user_permissions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -310,7 +369,7 @@ CREATE SEQUENCE public.django_admin_log_id_seq
 ALTER TABLE public.django_admin_log_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2414 (class 0 OID 0)
+-- TOC entry 2430 (class 0 OID 0)
 -- Dependencies: 197
 -- Name: django_admin_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -348,7 +407,7 @@ CREATE SEQUENCE public.django_content_type_id_seq
 ALTER TABLE public.django_content_type_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2415 (class 0 OID 0)
+-- TOC entry 2431 (class 0 OID 0)
 -- Dependencies: 183
 -- Name: django_content_type_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -387,7 +446,7 @@ CREATE SEQUENCE public.django_migrations_id_seq
 ALTER TABLE public.django_migrations_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2416 (class 0 OID 0)
+-- TOC entry 2432 (class 0 OID 0)
 -- Dependencies: 181
 -- Name: django_migrations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -438,7 +497,7 @@ CREATE SEQUENCE public.outros_cidade_id_seq
 ALTER TABLE public.outros_cidade_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2417 (class 0 OID 0)
+-- TOC entry 2433 (class 0 OID 0)
 -- Dependencies: 199
 -- Name: outros_cidade_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -475,7 +534,7 @@ CREATE SEQUENCE public.pedidos_categoriaproduto_id_seq
 ALTER TABLE public.pedidos_categoriaproduto_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2418 (class 0 OID 0)
+-- TOC entry 2434 (class 0 OID 0)
 -- Dependencies: 206
 -- Name: pedidos_categoriaproduto_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -517,7 +576,7 @@ CREATE SEQUENCE public.pedidos_endereco_id_seq
 ALTER TABLE public.pedidos_endereco_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2419 (class 0 OID 0)
+-- TOC entry 2435 (class 0 OID 0)
 -- Dependencies: 212
 -- Name: pedidos_endereco_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -532,7 +591,7 @@ ALTER SEQUENCE public.pedidos_endereco_id_seq OWNED BY public.pedidos_endereco.i
 
 CREATE TABLE public.pedidos_pedido (
     id integer NOT NULL,
-    status integer NOT NULL,
+    status_id integer NOT NULL,
     data timestamp with time zone NOT NULL,
     valor_total double precision NOT NULL,
     horario_entrega character varying(30) NOT NULL,
@@ -562,7 +621,7 @@ CREATE SEQUENCE public.pedidos_pedido_id_seq
 ALTER TABLE public.pedidos_pedido_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2420 (class 0 OID 0)
+-- TOC entry 2436 (class 0 OID 0)
 -- Dependencies: 208
 -- Name: pedidos_pedido_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -603,7 +662,7 @@ CREATE SEQUENCE public.pedidos_pedidoproduto_id_seq
 ALTER TABLE public.pedidos_pedidoproduto_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2421 (class 0 OID 0)
+-- TOC entry 2437 (class 0 OID 0)
 -- Dependencies: 214
 -- Name: pedidos_pedidoproduto_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -622,7 +681,8 @@ CREATE TABLE public.pedidos_produto (
     valor double precision NOT NULL,
     imagem character varying(100),
     categoria_id integer NOT NULL,
-    empresa_id integer NOT NULL
+    empresa_id integer NOT NULL,
+    ativo boolean NOT NULL
 );
 
 
@@ -644,12 +704,49 @@ CREATE SEQUENCE public.pedidos_produto_id_seq
 ALTER TABLE public.pedidos_produto_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2422 (class 0 OID 0)
+-- TOC entry 2438 (class 0 OID 0)
 -- Dependencies: 210
 -- Name: pedidos_produto_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.pedidos_produto_id_seq OWNED BY public.pedidos_produto.id;
+
+
+--
+-- TOC entry 218 (class 1259 OID 18959)
+-- Name: pedidos_statuspedido; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.pedidos_statuspedido (
+    id integer NOT NULL,
+    descricao character varying(30) NOT NULL
+);
+
+
+ALTER TABLE public.pedidos_statuspedido OWNER TO postgres;
+
+--
+-- TOC entry 217 (class 1259 OID 18957)
+-- Name: pedidos_statuspedido_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.pedidos_statuspedido_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.pedidos_statuspedido_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 2439 (class 0 OID 0)
+-- Dependencies: 217
+-- Name: pedidos_statuspedido_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.pedidos_statuspedido_id_seq OWNED BY public.pedidos_statuspedido.id;
 
 
 --
@@ -683,7 +780,7 @@ CREATE SEQUENCE public.pessoas_cliente_id_seq
 ALTER TABLE public.pessoas_cliente_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2423 (class 0 OID 0)
+-- TOC entry 2440 (class 0 OID 0)
 -- Dependencies: 201
 -- Name: pessoas_cliente_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -723,7 +820,7 @@ CREATE SEQUENCE public.pessoas_empresa_id_seq
 ALTER TABLE public.pessoas_empresa_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2424 (class 0 OID 0)
+-- TOC entry 2441 (class 0 OID 0)
 -- Dependencies: 203
 -- Name: pessoas_empresa_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -746,7 +843,7 @@ CREATE TABLE public.pessoas_funcionario (
 ALTER TABLE public.pessoas_funcionario OWNER TO postgres;
 
 --
--- TOC entry 2133 (class 2604 OID 18657)
+-- TOC entry 2141 (class 2604 OID 18657)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -754,7 +851,7 @@ ALTER TABLE ONLY public.auth_group ALTER COLUMN id SET DEFAULT nextval('public.a
 
 
 --
--- TOC entry 2134 (class 2604 OID 18667)
+-- TOC entry 2142 (class 2604 OID 18667)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -762,7 +859,7 @@ ALTER TABLE ONLY public.auth_group_permissions ALTER COLUMN id SET DEFAULT nextv
 
 
 --
--- TOC entry 2132 (class 2604 OID 18649)
+-- TOC entry 2140 (class 2604 OID 18649)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -770,7 +867,7 @@ ALTER TABLE ONLY public.auth_permission ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
--- TOC entry 2135 (class 2604 OID 18675)
+-- TOC entry 2143 (class 2604 OID 18675)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -778,7 +875,7 @@ ALTER TABLE ONLY public.auth_user ALTER COLUMN id SET DEFAULT nextval('public.au
 
 
 --
--- TOC entry 2136 (class 2604 OID 18685)
+-- TOC entry 2144 (class 2604 OID 18685)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -786,7 +883,7 @@ ALTER TABLE ONLY public.auth_user_groups ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 2137 (class 2604 OID 18693)
+-- TOC entry 2145 (class 2604 OID 18693)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -794,7 +891,7 @@ ALTER TABLE ONLY public.auth_user_user_permissions ALTER COLUMN id SET DEFAULT n
 
 
 --
--- TOC entry 2138 (class 2604 OID 18753)
+-- TOC entry 2146 (class 2604 OID 18753)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -802,7 +899,7 @@ ALTER TABLE ONLY public.django_admin_log ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 2131 (class 2604 OID 18639)
+-- TOC entry 2139 (class 2604 OID 18639)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -810,7 +907,7 @@ ALTER TABLE ONLY public.django_content_type ALTER COLUMN id SET DEFAULT nextval(
 
 
 --
--- TOC entry 2130 (class 2604 OID 18628)
+-- TOC entry 2138 (class 2604 OID 18628)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -818,7 +915,7 @@ ALTER TABLE ONLY public.django_migrations ALTER COLUMN id SET DEFAULT nextval('p
 
 
 --
--- TOC entry 2140 (class 2604 OID 18786)
+-- TOC entry 2148 (class 2604 OID 18786)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -826,7 +923,7 @@ ALTER TABLE ONLY public.outros_cidade ALTER COLUMN id SET DEFAULT nextval('publi
 
 
 --
--- TOC entry 2143 (class 2604 OID 18845)
+-- TOC entry 2151 (class 2604 OID 18845)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -834,7 +931,7 @@ ALTER TABLE ONLY public.pedidos_categoriaproduto ALTER COLUMN id SET DEFAULT nex
 
 
 --
--- TOC entry 2146 (class 2604 OID 18872)
+-- TOC entry 2154 (class 2604 OID 18872)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -842,7 +939,7 @@ ALTER TABLE ONLY public.pedidos_endereco ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 2144 (class 2604 OID 18853)
+-- TOC entry 2152 (class 2604 OID 18853)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -850,7 +947,7 @@ ALTER TABLE ONLY public.pedidos_pedido ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
--- TOC entry 2147 (class 2604 OID 18880)
+-- TOC entry 2155 (class 2604 OID 18880)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -858,7 +955,7 @@ ALTER TABLE ONLY public.pedidos_pedidoproduto ALTER COLUMN id SET DEFAULT nextva
 
 
 --
--- TOC entry 2145 (class 2604 OID 18864)
+-- TOC entry 2153 (class 2604 OID 18864)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -866,7 +963,15 @@ ALTER TABLE ONLY public.pedidos_produto ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
--- TOC entry 2141 (class 2604 OID 18794)
+-- TOC entry 2156 (class 2604 OID 18962)
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pedidos_statuspedido ALTER COLUMN id SET DEFAULT nextval('public.pedidos_statuspedido_id_seq'::regclass);
+
+
+--
+-- TOC entry 2149 (class 2604 OID 18794)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -874,7 +979,7 @@ ALTER TABLE ONLY public.pessoas_cliente ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
--- TOC entry 2142 (class 2604 OID 18804)
+-- TOC entry 2150 (class 2604 OID 18804)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -882,41 +987,46 @@ ALTER TABLE ONLY public.pessoas_empresa ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
--- TOC entry 2370 (class 0 OID 18654)
+-- TOC entry 2384 (class 0 OID 18654)
 -- Dependencies: 188
 -- Data for Name: auth_group; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
+INSERT INTO public.auth_group VALUES (1, 'Funcionário Empresa');
 
 
 --
--- TOC entry 2425 (class 0 OID 0)
+-- TOC entry 2442 (class 0 OID 0)
 -- Dependencies: 187
 -- Name: auth_group_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.auth_group_id_seq', 1, false);
+SELECT pg_catalog.setval('public.auth_group_id_seq', 1, true);
 
 
 --
--- TOC entry 2372 (class 0 OID 18664)
+-- TOC entry 2386 (class 0 OID 18664)
 -- Dependencies: 190
 -- Data for Name: auth_group_permissions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
+INSERT INTO public.auth_group_permissions VALUES (1, 1, 64);
+INSERT INTO public.auth_group_permissions VALUES (2, 1, 61);
+INSERT INTO public.auth_group_permissions VALUES (3, 1, 62);
+INSERT INTO public.auth_group_permissions VALUES (4, 1, 63);
 
 
 --
--- TOC entry 2426 (class 0 OID 0)
+-- TOC entry 2443 (class 0 OID 0)
 -- Dependencies: 189
 -- Name: auth_group_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.auth_group_permissions_id_seq', 1, false);
+SELECT pg_catalog.setval('public.auth_group_permissions_id_seq', 4, true);
 
 
 --
--- TOC entry 2368 (class 0 OID 18646)
+-- TOC entry 2382 (class 0 OID 18646)
 -- Dependencies: 186
 -- Data for Name: auth_permission; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -981,55 +1091,66 @@ INSERT INTO public.auth_permission VALUES (57, 'Can add Produto', 13, 'add_produ
 INSERT INTO public.auth_permission VALUES (58, 'Can change Produto', 13, 'change_produto');
 INSERT INTO public.auth_permission VALUES (59, 'Can delete Produto', 13, 'delete_produto');
 INSERT INTO public.auth_permission VALUES (60, 'Can view Produto', 13, 'view_produto');
+INSERT INTO public.auth_permission VALUES (61, 'Can add Produto da empresa', 16, 'add_produtoempresa');
+INSERT INTO public.auth_permission VALUES (62, 'Can change Produto da empresa', 16, 'change_produtoempresa');
+INSERT INTO public.auth_permission VALUES (63, 'Can delete Produto da empresa', 16, 'delete_produtoempresa');
+INSERT INTO public.auth_permission VALUES (64, 'Can view Produto da empresa', 16, 'view_produtoempresa');
+INSERT INTO public.auth_permission VALUES (65, 'Can add Situação do Pedidos', 17, 'add_statuspedido');
+INSERT INTO public.auth_permission VALUES (66, 'Can change Situação do Pedidos', 17, 'change_statuspedido');
+INSERT INTO public.auth_permission VALUES (67, 'Can delete Situação do Pedidos', 17, 'delete_statuspedido');
+INSERT INTO public.auth_permission VALUES (68, 'Can view Situação do Pedidos', 17, 'view_statuspedido');
 
 
 --
--- TOC entry 2427 (class 0 OID 0)
+-- TOC entry 2444 (class 0 OID 0)
 -- Dependencies: 185
 -- Name: auth_permission_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.auth_permission_id_seq', 60, true);
+SELECT pg_catalog.setval('public.auth_permission_id_seq', 68, true);
 
 
 --
--- TOC entry 2374 (class 0 OID 18672)
+-- TOC entry 2388 (class 0 OID 18672)
 -- Dependencies: 192
 -- Data for Name: auth_user; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.auth_user VALUES (1, 'pbkdf2_sha256$150000$LOgtUZgrnB7f$SaNz7Z5UH7Tk22a8/uQa3QLOLTU6KuLRevR9aTtmeRg=', '2020-03-21 12:05:57.863782-03', true, 'admin', '', '', 'edimarmanica@gmail.com', true, true, '2020-03-21 12:05:48.781038-03');
-INSERT INTO public.auth_user VALUES (2, '', NULL, false, 'jorge', '', '', '', true, true, '2020-03-21 12:08:26.031066-03');
+INSERT INTO public.auth_user VALUES (1, 'pbkdf2_sha256$150000$LOgtUZgrnB7f$SaNz7Z5UH7Tk22a8/uQa3QLOLTU6KuLRevR9aTtmeRg=', '2020-03-21 20:43:05.902091-03', true, 'admin', '', '', 'edimarmanica@gmail.com', true, true, '2020-03-21 12:05:48.781038-03');
+INSERT INTO public.auth_user VALUES (2, 'pbkdf2_sha256$150000$SLJxbbkbQMuG$wFhalrCPo8iy5AfS6b6uxfICib/s2JXpRNvN3wLiuvc=', '2020-03-21 20:43:42.26216-03', false, 'ana', '', '', '', true, true, '2020-03-21 12:08:26-03');
+INSERT INTO public.auth_user VALUES (3, 'pbkdf2_sha256$150000$5u5AgEYkuIA4$B3qza8lLr10ij4Qqpw32rtDgPbgRg8XTO2uUbu9PtAc=', '2020-03-21 20:44:58.411278-03', false, 'maria', '', '', '', true, true, '2020-03-21 20:34:59-03');
 
 
 --
--- TOC entry 2376 (class 0 OID 18682)
+-- TOC entry 2390 (class 0 OID 18682)
 -- Dependencies: 194
 -- Data for Name: auth_user_groups; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
+INSERT INTO public.auth_user_groups VALUES (2, 2, 1);
+INSERT INTO public.auth_user_groups VALUES (3, 3, 1);
 
 
 --
--- TOC entry 2428 (class 0 OID 0)
+-- TOC entry 2445 (class 0 OID 0)
 -- Dependencies: 193
 -- Name: auth_user_groups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.auth_user_groups_id_seq', 1, false);
+SELECT pg_catalog.setval('public.auth_user_groups_id_seq', 3, true);
 
 
 --
--- TOC entry 2429 (class 0 OID 0)
+-- TOC entry 2446 (class 0 OID 0)
 -- Dependencies: 191
 -- Name: auth_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.auth_user_id_seq', 2, true);
+SELECT pg_catalog.setval('public.auth_user_id_seq', 3, true);
 
 
 --
--- TOC entry 2378 (class 0 OID 18690)
+-- TOC entry 2392 (class 0 OID 18690)
 -- Dependencies: 196
 -- Data for Name: auth_user_user_permissions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1037,7 +1158,7 @@ SELECT pg_catalog.setval('public.auth_user_id_seq', 2, true);
 
 
 --
--- TOC entry 2430 (class 0 OID 0)
+-- TOC entry 2447 (class 0 OID 0)
 -- Dependencies: 195
 -- Name: auth_user_user_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1046,7 +1167,7 @@ SELECT pg_catalog.setval('public.auth_user_user_permissions_id_seq', 1, false);
 
 
 --
--- TOC entry 2380 (class 0 OID 18750)
+-- TOC entry 2394 (class 0 OID 18750)
 -- Dependencies: 198
 -- Data for Name: django_admin_log; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1059,19 +1180,96 @@ INSERT INTO public.django_admin_log VALUES (5, '2020-03-21 12:08:36.999412-03', 
 INSERT INTO public.django_admin_log VALUES (6, '2020-03-21 12:08:53.503066-03', '1', 'Arroz', 1, '[{"added": {}}]', 13, 1);
 INSERT INTO public.django_admin_log VALUES (7, '2020-03-21 12:09:02.079337-03', '2', 'Feijão', 1, '[{"added": {}}]', 13, 1);
 INSERT INTO public.django_admin_log VALUES (8, '2020-03-21 12:10:38.328742-03', '1', '2020-03-21 12:09:14-03:00 : João', 1, '[{"added": {}}, {"added": {"object": "Endereco object (1)", "name": "endereco"}}, {"added": {"object": "Arroz", "name": "Produtos do pedido"}}, {"added": {"object": "Feij\u00e3o", "name": "Produtos do pedido"}}]', 15, 1);
+INSERT INTO public.django_admin_log VALUES (9, '2020-03-21 16:55:58.217288-03', '2', 'jorge', 2, '[{"changed": {"fields": ["password"]}}]', 2, 1);
+INSERT INTO public.django_admin_log VALUES (10, '2020-03-21 16:56:44.452287-03', '1', 'Funcionário Empresa', 1, '[{"added": {}}]', 4, 1);
+INSERT INTO public.django_admin_log VALUES (11, '2020-03-21 16:57:15.739535-03', '1', 'Funcionário Empresa', 2, '[{"changed": {"fields": ["permissions"]}}]', 4, 1);
+INSERT INTO public.django_admin_log VALUES (12, '2020-03-21 16:58:14.754252-03', '2', 'jorge', 2, '[{"changed": {"fields": ["groups"]}}]', 2, 1);
+INSERT INTO public.django_admin_log VALUES (13, '2020-03-21 16:59:00.491668-03', '3', 'Arroz Tio João', 1, '[{"added": {}}]', 16, 2);
+INSERT INTO public.django_admin_log VALUES (14, '2020-03-21 17:00:14.350266-03', '4', 'Feijão', 1, '[{"added": {}}]', 16, 2);
+INSERT INTO public.django_admin_log VALUES (15, '2020-03-21 17:01:06.083312-03', '3', 'Arroz Tio João', 3, '', 16, 2);
+INSERT INTO public.django_admin_log VALUES (16, '2020-03-21 17:02:56.469055-03', '4', 'Feijão', 3, '', 16, 2);
+INSERT INTO public.django_admin_log VALUES (17, '2020-03-21 17:03:14.291489-03', '5', 'Feijão Cotribá', 1, '[{"added": {}}]', 16, 2);
+INSERT INTO public.django_admin_log VALUES (18, '2020-03-21 17:03:28.820442-03', '5', 'Feijão Cotribá', 3, '', 16, 2);
+INSERT INTO public.django_admin_log VALUES (19, '2020-03-21 17:12:50.019918-03', '6', 'Feijão Cotribá', 1, '[{"added": {}}]', 16, 2);
+INSERT INTO public.django_admin_log VALUES (20, '2020-03-21 17:13:08.222981-03', '7', 'Arroz Cotribá', 1, '[{"added": {}}]', 16, 2);
+INSERT INTO public.django_admin_log VALUES (21, '2020-03-21 17:13:25.355333-03', '7', 'Arroz Cotribá', 3, '', 16, 2);
+INSERT INTO public.django_admin_log VALUES (22, '2020-03-21 17:16:41.871769-03', '8', 'Arroz Cotribá', 1, '[{"added": {}}]', 16, 2);
+INSERT INTO public.django_admin_log VALUES (23, '2020-03-21 17:18:54.041873-03', '8', 'Arroz Cotribá', 3, '', 13, 1);
+INSERT INTO public.django_admin_log VALUES (24, '2020-03-21 17:21:19.954719-03', '1', '2020-03-21 15:09:14+00:00 : João', 3, '', 15, 1);
+INSERT INTO public.django_admin_log VALUES (25, '2020-03-21 17:21:58.01917-03', '1', 'Arroz', 3, '', 16, 2);
+INSERT INTO public.django_admin_log VALUES (26, '2020-03-21 17:24:09.501998-03', '2', 'Feijão', 3, '', 16, 2);
+INSERT INTO public.django_admin_log VALUES (27, '2020-03-21 17:24:29.710067-03', '9', 'Arroz Cotribá', 1, '[{"added": {}}]', 16, 2);
+INSERT INTO public.django_admin_log VALUES (28, '2020-03-21 17:35:25.454517-03', '1', 'Aguardando Atendimento', 1, '[{"added": {}}]', 17, 1);
+INSERT INTO public.django_admin_log VALUES (29, '2020-03-21 17:35:34.61585-03', '2', 'Em atendimento', 1, '[{"added": {}}]', 17, 1);
+INSERT INTO public.django_admin_log VALUES (30, '2020-03-21 17:35:44.37839-03', '3', 'Aguardando Entrega', 1, '[{"added": {}}]', 17, 1);
+INSERT INTO public.django_admin_log VALUES (31, '2020-03-21 17:35:51.242592-03', '4', 'Entregue', 1, '[{"added": {}}]', 17, 1);
+INSERT INTO public.django_admin_log VALUES (32, '2020-03-21 17:35:56.839927-03', '5', 'Cancelado', 1, '[{"added": {}}]', 17, 1);
+INSERT INTO public.django_admin_log VALUES (33, '2020-03-21 17:38:49.230342-03', '2', '2020-03-21 17:38:22-03:00 : João', 1, '[{"added": {}}, {"added": {"object": "Rua J\u00falio Rosa", "name": "endereco"}}, {"added": {"object": "Arroz Cotrib\u00e1", "name": "Produtos do pedido"}}]', 15, 1);
+INSERT INTO public.django_admin_log VALUES (34, '2020-03-21 18:36:57.995434-03', '1', 'Cotribá - Ibirubá', 2, '[{"changed": {"fields": ["limite_produto"]}}]', 9, 1);
+INSERT INTO public.django_admin_log VALUES (35, '2020-03-21 18:37:55.485601-03', '2', 'Coopeagri - Ibirubá', 1, '[{"added": {}}]', 9, 1);
+INSERT INTO public.django_admin_log VALUES (36, '2020-03-21 18:38:06.091486-03', '1', 'Cotribá - Ibirubá', 2, '[{"changed": {"fields": ["imagem"]}}]', 9, 1);
+INSERT INTO public.django_admin_log VALUES (37, '2020-03-21 18:38:30.115221-03', '2', 'Coopeagri - Ibirubá', 2, '[{"changed": {"fields": ["limite_produto"]}}]', 9, 1);
+INSERT INTO public.django_admin_log VALUES (38, '2020-03-21 18:39:21.791139-03', '10', 'Massa Cotribá', 1, '[{"added": {}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (39, '2020-03-21 18:56:48.779658-03', 'None', 'Pipoca', 1, '[{"added": {}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (40, '2020-03-21 18:58:22.241182-03', '6', 'Feijão Cotribá', 2, '[]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (41, '2020-03-21 18:58:42.939077-03', '9', 'Arroz Cotribá', 2, '[]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (42, '2020-03-21 19:03:31.835398-03', 'None', 'Teste', 1, '[{"added": {}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (43, '2020-03-21 19:04:03.45179-03', 'None', 'teste', 1, '[{"added": {}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (44, '2020-03-21 19:07:17.945083-03', 'None', 'Teste', 1, '[{"added": {}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (45, '2020-03-21 19:10:35.818653-03', 'None', 'Teste', 1, '[{"added": {}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (46, '2020-03-21 19:13:17.584634-03', 'None', 'Teste', 1, '[{"added": {}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (47, '2020-03-21 20:14:34.54169-03', '1', 'Cotribá - Ibirubá', 2, '[{"changed": {"fields": ["limite_produto"]}}]', 9, 1);
+INSERT INTO public.django_admin_log VALUES (48, '2020-03-21 20:19:55.842464-03', '1', 'Cotribá - Ibirubá', 2, '[{"changed": {"fields": ["limite_produto"]}}]', 9, 1);
+INSERT INTO public.django_admin_log VALUES (49, '2020-03-21 20:20:50.62216-03', '11', 'Arroz Coopeagri', 1, '[{"added": {}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (50, '2020-03-21 20:20:59.627299-03', '9', 'Arroz Cotribá', 2, '[]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (51, '2020-03-21 20:21:10.73474-03', '12', 'Teste', 1, '[{"added": {}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (52, '2020-03-21 20:24:29.794469-03', '9', 'Arroz Cotribá', 2, '[{"changed": {"fields": ["ativo"]}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (53, '2020-03-21 20:24:36.630354-03', '9', 'Arroz Cotribá', 2, '[{"changed": {"fields": ["ativo"]}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (54, '2020-03-21 20:27:00.218206-03', '9', 'Arroz Cotribá', 2, '[{"changed": {"fields": ["ativo"]}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (55, '2020-03-21 20:27:45.262975-03', '15', 'asdsad', 1, '[{"added": {}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (56, '2020-03-21 20:27:59.240762-03', '16', 'Novo', 1, '[{"added": {}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (57, '2020-03-21 20:28:10.122561-03', '15', 'asdsad', 3, '', 13, 1);
+INSERT INTO public.django_admin_log VALUES (58, '2020-03-21 20:28:10.127065-03', '16', 'Novo', 3, '', 13, 1);
+INSERT INTO public.django_admin_log VALUES (59, '2020-03-21 20:28:10.130382-03', '12', 'Teste', 3, '', 13, 1);
+INSERT INTO public.django_admin_log VALUES (60, '2020-03-21 20:32:11.438642-03', '2', 'Ana', 2, '[{"changed": {"fields": ["nome", "username"]}}]', 8, 1);
+INSERT INTO public.django_admin_log VALUES (61, '2020-03-21 20:34:59.460814-03', '3', 'Maria', 1, '[{"added": {}}]', 8, 1);
+INSERT INTO public.django_admin_log VALUES (62, '2020-03-21 20:35:38.854483-03', '2', 'ana', 2, '[{"changed": {"fields": ["groups"]}}]', 2, 1);
+INSERT INTO public.django_admin_log VALUES (63, '2020-03-21 20:35:49.825856-03', '3', 'maria', 2, '[]', 2, 1);
+INSERT INTO public.django_admin_log VALUES (64, '2020-03-21 20:35:58.069348-03', '2', 'ana', 2, '[]', 2, 1);
+INSERT INTO public.django_admin_log VALUES (65, '2020-03-21 20:36:30.253007-03', '2', 'Higiene e Limpeza', 1, '[{"added": {}}]', 12, 1);
+INSERT INTO public.django_admin_log VALUES (66, '2020-03-21 20:37:46.620368-03', '9', 'Arroz', 2, '[{"changed": {"fields": ["descricao", "ativo"]}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (67, '2020-03-21 20:38:00.174514-03', '11', 'Dúzia de ovos', 2, '[{"changed": {"fields": ["descricao"]}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (68, '2020-03-21 20:38:09.153532-03', '6', 'Feijão', 2, '[{"changed": {"fields": ["descricao"]}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (69, '2020-03-21 20:38:30.23952-03', '10', 'Papel Higiênico c/ 12', 2, '[{"changed": {"fields": ["descricao", "categoria", "valor"]}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (70, '2020-03-21 20:38:36.944606-03', '10', 'Papel Higiênico c/ 12', 2, '[]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (71, '2020-03-21 20:38:45.523041-03', '6', 'Feijão', 2, '[{"changed": {"fields": ["ativo"]}}]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (72, '2020-03-21 20:38:50.755026-03', '11', 'Dúzia de ovos', 2, '[]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (73, '2020-03-21 20:38:55.152641-03', '9', 'Arroz', 2, '[]', 13, 1);
+INSERT INTO public.django_admin_log VALUES (74, '2020-03-21 20:39:33.473931-03', '2', 'ana', 2, '[{"changed": {"fields": ["password"]}}]', 2, 1);
+INSERT INTO public.django_admin_log VALUES (75, '2020-03-21 20:39:39.016528-03', '2', 'ana', 2, '[]', 2, 1);
+INSERT INTO public.django_admin_log VALUES (76, '2020-03-21 20:41:35.57681-03', '3', 'maria', 2, '[{"changed": {"fields": ["password"]}}]', 2, 1);
+INSERT INTO public.django_admin_log VALUES (77, '2020-03-21 20:42:37.952971-03', '2', 'ana', 2, '[{"changed": {"fields": ["password"]}}]', 2, 1);
+INSERT INTO public.django_admin_log VALUES (78, '2020-03-21 20:42:42.88632-03', '2', 'ana', 2, '[]', 2, 1);
+INSERT INTO public.django_admin_log VALUES (79, '2020-03-21 20:43:24.748045-03', '2', 'ana', 2, '[{"changed": {"fields": ["groups"]}}]', 2, 1);
+INSERT INTO public.django_admin_log VALUES (80, '2020-03-21 20:43:32.899893-03', '3', 'maria', 2, '[{"changed": {"fields": ["groups"]}}]', 2, 1);
+INSERT INTO public.django_admin_log VALUES (81, '2020-03-21 20:44:15.301069-03', '17', 'Leite', 1, '[{"added": {}}]', 16, 2);
+INSERT INTO public.django_admin_log VALUES (82, '2020-03-21 20:44:22.66305-03', '17', 'Leite', 2, '[{"changed": {"fields": ["ativo"]}}]', 16, 2);
+INSERT INTO public.django_admin_log VALUES (83, '2020-03-21 20:44:44.870649-03', '17', 'Leite', 2, '[{"changed": {"fields": ["ativo"]}}]', 16, 2);
+INSERT INTO public.django_admin_log VALUES (84, '2020-03-21 20:45:16.132017-03', '18', 'Alface', 1, '[{"added": {}}]', 16, 3);
+INSERT INTO public.django_admin_log VALUES (85, '2020-03-21 20:45:24.109818-03', '18', 'Alface', 2, '[]', 16, 3);
 
 
 --
--- TOC entry 2431 (class 0 OID 0)
+-- TOC entry 2448 (class 0 OID 0)
 -- Dependencies: 197
 -- Name: django_admin_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.django_admin_log_id_seq', 8, true);
+SELECT pg_catalog.setval('public.django_admin_log_id_seq', 85, true);
 
 
 --
--- TOC entry 2366 (class 0 OID 18636)
+-- TOC entry 2380 (class 0 OID 18636)
 -- Dependencies: 184
 -- Data for Name: django_content_type; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1091,19 +1289,21 @@ INSERT INTO public.django_content_type VALUES (12, 'pedidos', 'categoriaproduto'
 INSERT INTO public.django_content_type VALUES (13, 'pedidos', 'produto');
 INSERT INTO public.django_content_type VALUES (14, 'pedidos', 'pedidoproduto');
 INSERT INTO public.django_content_type VALUES (15, 'pedidos', 'pedido');
+INSERT INTO public.django_content_type VALUES (16, 'pedidos_empresa', 'produtoempresa');
+INSERT INTO public.django_content_type VALUES (17, 'pedidos', 'statuspedido');
 
 
 --
--- TOC entry 2432 (class 0 OID 0)
+-- TOC entry 2449 (class 0 OID 0)
 -- Dependencies: 183
 -- Name: django_content_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.django_content_type_id_seq', 15, true);
+SELECT pg_catalog.setval('public.django_content_type_id_seq', 17, true);
 
 
 --
--- TOC entry 2364 (class 0 OID 18625)
+-- TOC entry 2378 (class 0 OID 18625)
 -- Dependencies: 182
 -- Data for Name: django_migrations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1134,28 +1334,32 @@ INSERT INTO public.django_migrations VALUES (23, 'pedidos', '0002_auto_20200321_
 INSERT INTO public.django_migrations VALUES (24, 'sessions', '0001_initial', '2020-03-21 12:02:53.753059-03');
 INSERT INTO public.django_migrations VALUES (25, 'pessoas', '0004_auto_20200321_1207', '2020-03-21 12:07:36.381454-03');
 INSERT INTO public.django_migrations VALUES (26, 'pedidos', '0003_auto_20200321_1210', '2020-03-21 12:10:55.796059-03');
+INSERT INTO public.django_migrations VALUES (27, 'pedidos_empresa', '0001_initial', '2020-03-21 16:52:44.456499-03');
+INSERT INTO public.django_migrations VALUES (28, 'pedidos', '0004_auto_20200321_1711', '2020-03-21 17:11:53.330347-03');
+INSERT INTO public.django_migrations VALUES (29, 'pedidos', '0005_auto_20200321_1734', '2020-03-21 17:34:27.006292-03');
+INSERT INTO public.django_migrations VALUES (30, 'pedidos', '0006_auto_20200321_1737', '2020-03-21 17:37:15.585207-03');
+INSERT INTO public.django_migrations VALUES (31, 'pedidos', '0007_auto_20200321_1743', '2020-03-21 17:44:00.09208-03');
 
 
 --
--- TOC entry 2433 (class 0 OID 0)
+-- TOC entry 2450 (class 0 OID 0)
 -- Dependencies: 181
 -- Name: django_migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.django_migrations_id_seq', 26, true);
+SELECT pg_catalog.setval('public.django_migrations_id_seq', 31, true);
 
 
 --
--- TOC entry 2398 (class 0 OID 18939)
+-- TOC entry 2412 (class 0 OID 18939)
 -- Dependencies: 216
 -- Data for Name: django_session; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.django_session VALUES ('nzyywwadckouaea6nciqeozwdwa5i6u1', 'MDBkYzllMGVlZmMxMTNhYmNhMDg5Y2QzOWVjNGQwNGM5NmU2NDE4ZDp7Il9hdXRoX3VzZXJfaWQiOiIxIiwiX2F1dGhfdXNlcl9iYWNrZW5kIjoiZGphbmdvLmNvbnRyaWIuYXV0aC5iYWNrZW5kcy5Nb2RlbEJhY2tlbmQiLCJfYXV0aF91c2VyX2hhc2giOiIzMDUzMGUzMDFkODVkMDI3Y2VlN2RhMzRlNTMzNDg3OWRkZDI4YjhmIn0=', '2020-04-04 12:05:57.890472-03');
 
 
 --
--- TOC entry 2382 (class 0 OID 18783)
+-- TOC entry 2396 (class 0 OID 18783)
 -- Dependencies: 200
 -- Data for Name: outros_cidade; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1164,7 +1368,7 @@ INSERT INTO public.outros_cidade VALUES (1, 'Ibirubá');
 
 
 --
--- TOC entry 2434 (class 0 OID 0)
+-- TOC entry 2451 (class 0 OID 0)
 -- Dependencies: 199
 -- Name: outros_cidade_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1173,99 +1377,125 @@ SELECT pg_catalog.setval('public.outros_cidade_id_seq', 1, true);
 
 
 --
--- TOC entry 2389 (class 0 OID 18842)
+-- TOC entry 2403 (class 0 OID 18842)
 -- Dependencies: 207
 -- Data for Name: pedidos_categoriaproduto; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 INSERT INTO public.pedidos_categoriaproduto VALUES (1, 'Alimentícios');
+INSERT INTO public.pedidos_categoriaproduto VALUES (2, 'Higiene e Limpeza');
 
 
 --
--- TOC entry 2435 (class 0 OID 0)
+-- TOC entry 2452 (class 0 OID 0)
 -- Dependencies: 206
 -- Name: pedidos_categoriaproduto_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.pedidos_categoriaproduto_id_seq', 1, true);
+SELECT pg_catalog.setval('public.pedidos_categoriaproduto_id_seq', 2, true);
 
 
 --
--- TOC entry 2395 (class 0 OID 18869)
+-- TOC entry 2409 (class 0 OID 18869)
 -- Dependencies: 213
 -- Data for Name: pedidos_endereco; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.pedidos_endereco VALUES (1, 'Rua Júlio Rosa', 1245, NULL, 'Teste', 1, 1);
+INSERT INTO public.pedidos_endereco VALUES (2, 'Rua Júlio Rosa', 1245, NULL, 'teste', 1, 2);
 
 
 --
--- TOC entry 2436 (class 0 OID 0)
+-- TOC entry 2453 (class 0 OID 0)
 -- Dependencies: 212
 -- Name: pedidos_endereco_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.pedidos_endereco_id_seq', 1, true);
+SELECT pg_catalog.setval('public.pedidos_endereco_id_seq', 2, true);
 
 
 --
--- TOC entry 2391 (class 0 OID 18850)
+-- TOC entry 2405 (class 0 OID 18850)
 -- Dependencies: 209
 -- Data for Name: pedidos_pedido; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.pedidos_pedido VALUES (1, 0, '2020-03-21 12:09:14-03', 30, 'Qualquer horário de tarde', 'teste', 'teste', 1, 1, 2);
+INSERT INTO public.pedidos_pedido VALUES (2, 1, '2020-03-21 17:38:22-03', 12, 'Qualquer horário de tarde', 'sfd', 'sdf', 1, 1, NULL);
 
 
 --
--- TOC entry 2437 (class 0 OID 0)
+-- TOC entry 2454 (class 0 OID 0)
 -- Dependencies: 208
 -- Name: pedidos_pedido_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.pedidos_pedido_id_seq', 1, true);
+SELECT pg_catalog.setval('public.pedidos_pedido_id_seq', 2, true);
 
 
 --
--- TOC entry 2397 (class 0 OID 18877)
+-- TOC entry 2411 (class 0 OID 18877)
 -- Dependencies: 215
 -- Data for Name: pedidos_pedidoproduto; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.pedidos_pedidoproduto VALUES (1, 1, 10, 10, 1, 1);
-INSERT INTO public.pedidos_pedidoproduto VALUES (2, 2, 10, 20, 1, 2);
+INSERT INTO public.pedidos_pedidoproduto VALUES (3, 1, 14, 14, 2, 9);
 
 
 --
--- TOC entry 2438 (class 0 OID 0)
+-- TOC entry 2455 (class 0 OID 0)
 -- Dependencies: 214
 -- Name: pedidos_pedidoproduto_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.pedidos_pedidoproduto_id_seq', 2, true);
+SELECT pg_catalog.setval('public.pedidos_pedidoproduto_id_seq', 3, true);
 
 
 --
--- TOC entry 2393 (class 0 OID 18861)
+-- TOC entry 2407 (class 0 OID 18861)
 -- Dependencies: 211
 -- Data for Name: pedidos_produto; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.pedidos_produto VALUES (1, 'Arroz', 12.4000000000000004, '', 1, 1);
-INSERT INTO public.pedidos_produto VALUES (2, 'Feijão', 10, '', 1, 1);
+INSERT INTO public.pedidos_produto VALUES (10, 'Papel Higiênico c/ 12', 12.9000000000000004, '', 2, 1, true);
+INSERT INTO public.pedidos_produto VALUES (6, 'Feijão', 10, 'produtos/feijao.jpeg', 1, 1, false);
+INSERT INTO public.pedidos_produto VALUES (11, 'Dúzia de ovos', 2, '', 1, 2, true);
+INSERT INTO public.pedidos_produto VALUES (9, 'Arroz', 12, '', 1, 1, true);
+INSERT INTO public.pedidos_produto VALUES (17, 'Leite', 2.45000000000000018, '', 1, 1, false);
+INSERT INTO public.pedidos_produto VALUES (18, 'Alface', 3, '', 1, 2, true);
 
 
 --
--- TOC entry 2439 (class 0 OID 0)
+-- TOC entry 2456 (class 0 OID 0)
 -- Dependencies: 210
 -- Name: pedidos_produto_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.pedidos_produto_id_seq', 2, true);
+SELECT pg_catalog.setval('public.pedidos_produto_id_seq', 18, true);
 
 
 --
--- TOC entry 2384 (class 0 OID 18791)
+-- TOC entry 2414 (class 0 OID 18959)
+-- Dependencies: 218
+-- Data for Name: pedidos_statuspedido; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+INSERT INTO public.pedidos_statuspedido VALUES (1, 'Aguardando Atendimento');
+INSERT INTO public.pedidos_statuspedido VALUES (2, 'Em atendimento');
+INSERT INTO public.pedidos_statuspedido VALUES (3, 'Aguardando Entrega');
+INSERT INTO public.pedidos_statuspedido VALUES (4, 'Entregue');
+INSERT INTO public.pedidos_statuspedido VALUES (5, 'Cancelado');
+
+
+--
+-- TOC entry 2457 (class 0 OID 0)
+-- Dependencies: 217
+-- Name: pedidos_statuspedido_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.pedidos_statuspedido_id_seq', 5, true);
+
+
+--
+-- TOC entry 2398 (class 0 OID 18791)
 -- Dependencies: 202
 -- Data for Name: pessoas_cliente; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1274,7 +1504,7 @@ INSERT INTO public.pessoas_cliente VALUES (1, 'João', 54991552721, 0);
 
 
 --
--- TOC entry 2440 (class 0 OID 0)
+-- TOC entry 2458 (class 0 OID 0)
 -- Dependencies: 201
 -- Name: pessoas_cliente_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1283,34 +1513,36 @@ SELECT pg_catalog.setval('public.pessoas_cliente_id_seq', 1, true);
 
 
 --
--- TOC entry 2386 (class 0 OID 18801)
+-- TOC entry 2400 (class 0 OID 18801)
 -- Dependencies: 204
 -- Data for Name: pessoas_empresa; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.pessoas_empresa VALUES (1, 'Cotribá', 'empresas/cotriba_tgEtoiX.png', 30, 1);
+INSERT INTO public.pessoas_empresa VALUES (2, 'Coopeagri', 'empresas/coopeagri.png', 3, 1);
+INSERT INTO public.pessoas_empresa VALUES (1, 'Cotribá', 'empresas/cotriba.png', 3, 1);
 
 
 --
--- TOC entry 2441 (class 0 OID 0)
+-- TOC entry 2459 (class 0 OID 0)
 -- Dependencies: 203
 -- Name: pessoas_empresa_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.pessoas_empresa_id_seq', 1, true);
+SELECT pg_catalog.setval('public.pessoas_empresa_id_seq', 2, true);
 
 
 --
--- TOC entry 2387 (class 0 OID 18807)
+-- TOC entry 2401 (class 0 OID 18807)
 -- Dependencies: 205
 -- Data for Name: pessoas_funcionario; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.pessoas_funcionario VALUES (2, 'Jorge', 1);
+INSERT INTO public.pessoas_funcionario VALUES (2, 'Ana', 1);
+INSERT INTO public.pessoas_funcionario VALUES (3, 'Maria', 2);
 
 
 --
--- TOC entry 2161 (class 2606 OID 18779)
+-- TOC entry 2170 (class 2606 OID 18779)
 -- Name: auth_group_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1319,7 +1551,7 @@ ALTER TABLE ONLY public.auth_group
 
 
 --
--- TOC entry 2166 (class 2606 OID 18716)
+-- TOC entry 2175 (class 2606 OID 18716)
 -- Name: auth_group_permissions_group_id_permission_id_0cd325b0_uniq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1328,7 +1560,7 @@ ALTER TABLE ONLY public.auth_group_permissions
 
 
 --
--- TOC entry 2169 (class 2606 OID 18669)
+-- TOC entry 2178 (class 2606 OID 18669)
 -- Name: auth_group_permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1337,7 +1569,7 @@ ALTER TABLE ONLY public.auth_group_permissions
 
 
 --
--- TOC entry 2163 (class 2606 OID 18659)
+-- TOC entry 2172 (class 2606 OID 18659)
 -- Name: auth_group_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1346,7 +1578,7 @@ ALTER TABLE ONLY public.auth_group
 
 
 --
--- TOC entry 2156 (class 2606 OID 18702)
+-- TOC entry 2165 (class 2606 OID 18702)
 -- Name: auth_permission_content_type_id_codename_01ab375a_uniq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1355,7 +1587,7 @@ ALTER TABLE ONLY public.auth_permission
 
 
 --
--- TOC entry 2158 (class 2606 OID 18651)
+-- TOC entry 2167 (class 2606 OID 18651)
 -- Name: auth_permission_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1364,7 +1596,7 @@ ALTER TABLE ONLY public.auth_permission
 
 
 --
--- TOC entry 2177 (class 2606 OID 18687)
+-- TOC entry 2186 (class 2606 OID 18687)
 -- Name: auth_user_groups_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1373,7 +1605,7 @@ ALTER TABLE ONLY public.auth_user_groups
 
 
 --
--- TOC entry 2180 (class 2606 OID 18731)
+-- TOC entry 2189 (class 2606 OID 18731)
 -- Name: auth_user_groups_user_id_group_id_94350c0c_uniq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1382,7 +1614,7 @@ ALTER TABLE ONLY public.auth_user_groups
 
 
 --
--- TOC entry 2171 (class 2606 OID 18677)
+-- TOC entry 2180 (class 2606 OID 18677)
 -- Name: auth_user_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1391,7 +1623,7 @@ ALTER TABLE ONLY public.auth_user
 
 
 --
--- TOC entry 2183 (class 2606 OID 18695)
+-- TOC entry 2192 (class 2606 OID 18695)
 -- Name: auth_user_user_permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1400,7 +1632,7 @@ ALTER TABLE ONLY public.auth_user_user_permissions
 
 
 --
--- TOC entry 2186 (class 2606 OID 18745)
+-- TOC entry 2195 (class 2606 OID 18745)
 -- Name: auth_user_user_permissions_user_id_permission_id_14a6b632_uniq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1409,7 +1641,7 @@ ALTER TABLE ONLY public.auth_user_user_permissions
 
 
 --
--- TOC entry 2174 (class 2606 OID 18773)
+-- TOC entry 2183 (class 2606 OID 18773)
 -- Name: auth_user_username_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1418,7 +1650,7 @@ ALTER TABLE ONLY public.auth_user
 
 
 --
--- TOC entry 2189 (class 2606 OID 18759)
+-- TOC entry 2198 (class 2606 OID 18759)
 -- Name: django_admin_log_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1427,7 +1659,7 @@ ALTER TABLE ONLY public.django_admin_log
 
 
 --
--- TOC entry 2151 (class 2606 OID 18643)
+-- TOC entry 2160 (class 2606 OID 18643)
 -- Name: django_content_type_app_label_model_76bd3d3b_uniq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1436,7 +1668,7 @@ ALTER TABLE ONLY public.django_content_type
 
 
 --
--- TOC entry 2153 (class 2606 OID 18641)
+-- TOC entry 2162 (class 2606 OID 18641)
 -- Name: django_content_type_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1445,7 +1677,7 @@ ALTER TABLE ONLY public.django_content_type
 
 
 --
--- TOC entry 2149 (class 2606 OID 18633)
+-- TOC entry 2158 (class 2606 OID 18633)
 -- Name: django_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1454,7 +1686,7 @@ ALTER TABLE ONLY public.django_migrations
 
 
 --
--- TOC entry 2226 (class 2606 OID 18946)
+-- TOC entry 2236 (class 2606 OID 18946)
 -- Name: django_session_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1463,7 +1695,7 @@ ALTER TABLE ONLY public.django_session
 
 
 --
--- TOC entry 2192 (class 2606 OID 18788)
+-- TOC entry 2201 (class 2606 OID 18788)
 -- Name: outros_cidade_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1472,7 +1704,7 @@ ALTER TABLE ONLY public.outros_cidade
 
 
 --
--- TOC entry 2204 (class 2606 OID 18847)
+-- TOC entry 2213 (class 2606 OID 18847)
 -- Name: pedidos_categoriaproduto_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1481,7 +1713,7 @@ ALTER TABLE ONLY public.pedidos_categoriaproduto
 
 
 --
--- TOC entry 2217 (class 2606 OID 18874)
+-- TOC entry 2227 (class 2606 OID 18874)
 -- Name: pedidos_endereco_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1490,7 +1722,7 @@ ALTER TABLE ONLY public.pedidos_endereco
 
 
 --
--- TOC entry 2209 (class 2606 OID 18858)
+-- TOC entry 2218 (class 2606 OID 18858)
 -- Name: pedidos_pedido_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1499,7 +1731,7 @@ ALTER TABLE ONLY public.pedidos_pedido
 
 
 --
--- TOC entry 2220 (class 2606 OID 18936)
+-- TOC entry 2230 (class 2606 OID 18936)
 -- Name: pedidos_pedidoproduto_pedido_id_produto_id_b539101f_uniq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1508,7 +1740,7 @@ ALTER TABLE ONLY public.pedidos_pedidoproduto
 
 
 --
--- TOC entry 2222 (class 2606 OID 18882)
+-- TOC entry 2232 (class 2606 OID 18882)
 -- Name: pedidos_pedidoproduto_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1517,7 +1749,7 @@ ALTER TABLE ONLY public.pedidos_pedidoproduto
 
 
 --
--- TOC entry 2213 (class 2606 OID 18866)
+-- TOC entry 2223 (class 2606 OID 18866)
 -- Name: pedidos_produto_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1526,7 +1758,16 @@ ALTER TABLE ONLY public.pedidos_produto
 
 
 --
--- TOC entry 2194 (class 2606 OID 18796)
+-- TOC entry 2239 (class 2606 OID 18964)
+-- Name: pedidos_statuspedido_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pedidos_statuspedido
+    ADD CONSTRAINT pedidos_statuspedido_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2203 (class 2606 OID 18796)
 -- Name: pessoas_cliente_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1535,7 +1776,7 @@ ALTER TABLE ONLY public.pessoas_cliente
 
 
 --
--- TOC entry 2196 (class 2606 OID 18951)
+-- TOC entry 2205 (class 2606 OID 18951)
 -- Name: pessoas_cliente_telefone_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1544,7 +1785,7 @@ ALTER TABLE ONLY public.pessoas_cliente
 
 
 --
--- TOC entry 2199 (class 2606 OID 18806)
+-- TOC entry 2208 (class 2606 OID 18806)
 -- Name: pessoas_empresa_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1553,7 +1794,7 @@ ALTER TABLE ONLY public.pessoas_empresa
 
 
 --
--- TOC entry 2202 (class 2606 OID 18811)
+-- TOC entry 2211 (class 2606 OID 18811)
 -- Name: pessoas_funcionario_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1562,7 +1803,7 @@ ALTER TABLE ONLY public.pessoas_funcionario
 
 
 --
--- TOC entry 2159 (class 1259 OID 18780)
+-- TOC entry 2168 (class 1259 OID 18780)
 -- Name: auth_group_name_a6ea08ec_like; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1570,7 +1811,7 @@ CREATE INDEX auth_group_name_a6ea08ec_like ON public.auth_group USING btree (nam
 
 
 --
--- TOC entry 2164 (class 1259 OID 18717)
+-- TOC entry 2173 (class 1259 OID 18717)
 -- Name: auth_group_permissions_group_id_b120cbf9; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1578,7 +1819,7 @@ CREATE INDEX auth_group_permissions_group_id_b120cbf9 ON public.auth_group_permi
 
 
 --
--- TOC entry 2167 (class 1259 OID 18718)
+-- TOC entry 2176 (class 1259 OID 18718)
 -- Name: auth_group_permissions_permission_id_84c5c92e; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1586,7 +1827,7 @@ CREATE INDEX auth_group_permissions_permission_id_84c5c92e ON public.auth_group_
 
 
 --
--- TOC entry 2154 (class 1259 OID 18703)
+-- TOC entry 2163 (class 1259 OID 18703)
 -- Name: auth_permission_content_type_id_2f476e4b; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1594,7 +1835,7 @@ CREATE INDEX auth_permission_content_type_id_2f476e4b ON public.auth_permission 
 
 
 --
--- TOC entry 2175 (class 1259 OID 18733)
+-- TOC entry 2184 (class 1259 OID 18733)
 -- Name: auth_user_groups_group_id_97559544; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1602,7 +1843,7 @@ CREATE INDEX auth_user_groups_group_id_97559544 ON public.auth_user_groups USING
 
 
 --
--- TOC entry 2178 (class 1259 OID 18732)
+-- TOC entry 2187 (class 1259 OID 18732)
 -- Name: auth_user_groups_user_id_6a12ed8b; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1610,7 +1851,7 @@ CREATE INDEX auth_user_groups_user_id_6a12ed8b ON public.auth_user_groups USING 
 
 
 --
--- TOC entry 2181 (class 1259 OID 18747)
+-- TOC entry 2190 (class 1259 OID 18747)
 -- Name: auth_user_user_permissions_permission_id_1fbb5f2c; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1618,7 +1859,7 @@ CREATE INDEX auth_user_user_permissions_permission_id_1fbb5f2c ON public.auth_us
 
 
 --
--- TOC entry 2184 (class 1259 OID 18746)
+-- TOC entry 2193 (class 1259 OID 18746)
 -- Name: auth_user_user_permissions_user_id_a95ead1b; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1626,7 +1867,7 @@ CREATE INDEX auth_user_user_permissions_user_id_a95ead1b ON public.auth_user_use
 
 
 --
--- TOC entry 2172 (class 1259 OID 18774)
+-- TOC entry 2181 (class 1259 OID 18774)
 -- Name: auth_user_username_6821ab7c_like; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1634,7 +1875,7 @@ CREATE INDEX auth_user_username_6821ab7c_like ON public.auth_user USING btree (u
 
 
 --
--- TOC entry 2187 (class 1259 OID 18770)
+-- TOC entry 2196 (class 1259 OID 18770)
 -- Name: django_admin_log_content_type_id_c4bce8eb; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1642,7 +1883,7 @@ CREATE INDEX django_admin_log_content_type_id_c4bce8eb ON public.django_admin_lo
 
 
 --
--- TOC entry 2190 (class 1259 OID 18771)
+-- TOC entry 2199 (class 1259 OID 18771)
 -- Name: django_admin_log_user_id_c564eba6; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1650,7 +1891,7 @@ CREATE INDEX django_admin_log_user_id_c564eba6 ON public.django_admin_log USING 
 
 
 --
--- TOC entry 2224 (class 1259 OID 18948)
+-- TOC entry 2234 (class 1259 OID 18948)
 -- Name: django_session_expire_date_a5c62663; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1658,7 +1899,7 @@ CREATE INDEX django_session_expire_date_a5c62663 ON public.django_session USING 
 
 
 --
--- TOC entry 2227 (class 1259 OID 18947)
+-- TOC entry 2237 (class 1259 OID 18947)
 -- Name: django_session_session_key_c0390e0f_like; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1666,7 +1907,7 @@ CREATE INDEX django_session_session_key_c0390e0f_like ON public.django_session U
 
 
 --
--- TOC entry 2214 (class 1259 OID 18923)
+-- TOC entry 2224 (class 1259 OID 18923)
 -- Name: pedidos_endereco_cidade_id_d411cb38; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1674,7 +1915,7 @@ CREATE INDEX pedidos_endereco_cidade_id_d411cb38 ON public.pedidos_endereco USIN
 
 
 --
--- TOC entry 2215 (class 1259 OID 18924)
+-- TOC entry 2225 (class 1259 OID 18924)
 -- Name: pedidos_endereco_pedido_id_1f69ee37; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1682,7 +1923,7 @@ CREATE INDEX pedidos_endereco_pedido_id_1f69ee37 ON public.pedidos_endereco USIN
 
 
 --
--- TOC entry 2205 (class 1259 OID 18898)
+-- TOC entry 2214 (class 1259 OID 18898)
 -- Name: pedidos_pedido_cliente_id_84f4fc73; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1690,7 +1931,7 @@ CREATE INDEX pedidos_pedido_cliente_id_84f4fc73 ON public.pedidos_pedido USING b
 
 
 --
--- TOC entry 2206 (class 1259 OID 18899)
+-- TOC entry 2215 (class 1259 OID 18899)
 -- Name: pedidos_pedido_empresa_id_88ea251a; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1698,7 +1939,7 @@ CREATE INDEX pedidos_pedido_empresa_id_88ea251a ON public.pedidos_pedido USING b
 
 
 --
--- TOC entry 2207 (class 1259 OID 18900)
+-- TOC entry 2216 (class 1259 OID 18900)
 -- Name: pedidos_pedido_funcionario_id_8154228a; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1706,7 +1947,15 @@ CREATE INDEX pedidos_pedido_funcionario_id_8154228a ON public.pedidos_pedido USI
 
 
 --
--- TOC entry 2218 (class 1259 OID 18937)
+-- TOC entry 2219 (class 1259 OID 18970)
+-- Name: pedidos_pedido_status_id_84f6c512; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX pedidos_pedido_status_id_84f6c512 ON public.pedidos_pedido USING btree (status_id);
+
+
+--
+-- TOC entry 2228 (class 1259 OID 18937)
 -- Name: pedidos_pedidoproduto_pedido_id_ab5340e1; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1714,7 +1963,7 @@ CREATE INDEX pedidos_pedidoproduto_pedido_id_ab5340e1 ON public.pedidos_pedidopr
 
 
 --
--- TOC entry 2223 (class 1259 OID 18938)
+-- TOC entry 2233 (class 1259 OID 18938)
 -- Name: pedidos_pedidoproduto_produto_id_d564b867; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1722,7 +1971,7 @@ CREATE INDEX pedidos_pedidoproduto_produto_id_d564b867 ON public.pedidos_pedidop
 
 
 --
--- TOC entry 2210 (class 1259 OID 18911)
+-- TOC entry 2220 (class 1259 OID 18911)
 -- Name: pedidos_produto_categoria_id_13275e73; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1730,7 +1979,7 @@ CREATE INDEX pedidos_produto_categoria_id_13275e73 ON public.pedidos_produto USI
 
 
 --
--- TOC entry 2211 (class 1259 OID 18912)
+-- TOC entry 2221 (class 1259 OID 18912)
 -- Name: pedidos_produto_empresa_id_eddee74b; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1738,7 +1987,7 @@ CREATE INDEX pedidos_produto_empresa_id_eddee74b ON public.pedidos_produto USING
 
 
 --
--- TOC entry 2197 (class 1259 OID 18828)
+-- TOC entry 2206 (class 1259 OID 18828)
 -- Name: pessoas_empresa_cidade_id_40bb748c; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1746,7 +1995,7 @@ CREATE INDEX pessoas_empresa_cidade_id_40bb748c ON public.pessoas_empresa USING 
 
 
 --
--- TOC entry 2200 (class 1259 OID 18822)
+-- TOC entry 2209 (class 1259 OID 18822)
 -- Name: pessoas_funcionario_empresa_id_7e9d8835; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1754,7 +2003,15 @@ CREATE INDEX pessoas_funcionario_empresa_id_7e9d8835 ON public.pessoas_funcionar
 
 
 --
--- TOC entry 2230 (class 2606 OID 18710)
+-- TOC entry 2262 (class 2620 OID 19002)
+-- Name: trg_limite_produto; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER trg_limite_produto AFTER INSERT OR UPDATE ON public.pedidos_produto FOR EACH ROW EXECUTE PROCEDURE public.check_limite_produtos();
+
+
+--
+-- TOC entry 2242 (class 2606 OID 18710)
 -- Name: auth_group_permissio_permission_id_84c5c92e_fk_auth_perm; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1763,7 +2020,7 @@ ALTER TABLE ONLY public.auth_group_permissions
 
 
 --
--- TOC entry 2229 (class 2606 OID 18705)
+-- TOC entry 2241 (class 2606 OID 18705)
 -- Name: auth_group_permissions_group_id_b120cbf9_fk_auth_group_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1772,7 +2029,7 @@ ALTER TABLE ONLY public.auth_group_permissions
 
 
 --
--- TOC entry 2228 (class 2606 OID 18696)
+-- TOC entry 2240 (class 2606 OID 18696)
 -- Name: auth_permission_content_type_id_2f476e4b_fk_django_co; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1781,7 +2038,7 @@ ALTER TABLE ONLY public.auth_permission
 
 
 --
--- TOC entry 2232 (class 2606 OID 18725)
+-- TOC entry 2244 (class 2606 OID 18725)
 -- Name: auth_user_groups_group_id_97559544_fk_auth_group_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1790,7 +2047,7 @@ ALTER TABLE ONLY public.auth_user_groups
 
 
 --
--- TOC entry 2231 (class 2606 OID 18720)
+-- TOC entry 2243 (class 2606 OID 18720)
 -- Name: auth_user_groups_user_id_6a12ed8b_fk_auth_user_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1799,7 +2056,7 @@ ALTER TABLE ONLY public.auth_user_groups
 
 
 --
--- TOC entry 2234 (class 2606 OID 18739)
+-- TOC entry 2246 (class 2606 OID 18739)
 -- Name: auth_user_user_permi_permission_id_1fbb5f2c_fk_auth_perm; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1808,7 +2065,7 @@ ALTER TABLE ONLY public.auth_user_user_permissions
 
 
 --
--- TOC entry 2233 (class 2606 OID 18734)
+-- TOC entry 2245 (class 2606 OID 18734)
 -- Name: auth_user_user_permissions_user_id_a95ead1b_fk_auth_user_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1817,7 +2074,7 @@ ALTER TABLE ONLY public.auth_user_user_permissions
 
 
 --
--- TOC entry 2235 (class 2606 OID 18760)
+-- TOC entry 2247 (class 2606 OID 18760)
 -- Name: django_admin_log_content_type_id_c4bce8eb_fk_django_co; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1826,7 +2083,7 @@ ALTER TABLE ONLY public.django_admin_log
 
 
 --
--- TOC entry 2236 (class 2606 OID 18765)
+-- TOC entry 2248 (class 2606 OID 18765)
 -- Name: django_admin_log_user_id_c564eba6_fk_auth_user_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1835,7 +2092,7 @@ ALTER TABLE ONLY public.django_admin_log
 
 
 --
--- TOC entry 2245 (class 2606 OID 18913)
+-- TOC entry 2258 (class 2606 OID 18913)
 -- Name: pedidos_endereco_cidade_id_d411cb38_fk_outros_cidade_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1844,7 +2101,7 @@ ALTER TABLE ONLY public.pedidos_endereco
 
 
 --
--- TOC entry 2246 (class 2606 OID 18918)
+-- TOC entry 2259 (class 2606 OID 18965)
 -- Name: pedidos_endereco_pedido_id_1f69ee37_fk_pedidos_pedido_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1853,7 +2110,7 @@ ALTER TABLE ONLY public.pedidos_endereco
 
 
 --
--- TOC entry 2240 (class 2606 OID 18883)
+-- TOC entry 2252 (class 2606 OID 18883)
 -- Name: pedidos_pedido_cliente_id_84f4fc73_fk_pessoas_cliente_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1862,7 +2119,7 @@ ALTER TABLE ONLY public.pedidos_pedido
 
 
 --
--- TOC entry 2241 (class 2606 OID 18888)
+-- TOC entry 2253 (class 2606 OID 18888)
 -- Name: pedidos_pedido_empresa_id_88ea251a_fk_pessoas_empresa_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1871,7 +2128,7 @@ ALTER TABLE ONLY public.pedidos_pedido
 
 
 --
--- TOC entry 2242 (class 2606 OID 18893)
+-- TOC entry 2255 (class 2606 OID 18994)
 -- Name: pedidos_pedido_funcionario_id_8154228a_fk_pessoas_f; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1880,7 +2137,16 @@ ALTER TABLE ONLY public.pedidos_pedido
 
 
 --
--- TOC entry 2247 (class 2606 OID 18925)
+-- TOC entry 2254 (class 2606 OID 18982)
+-- Name: pedidos_pedido_status_id_84f6c512_fk_pedidos_statuspedido_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pedidos_pedido
+    ADD CONSTRAINT pedidos_pedido_status_id_84f6c512_fk_pedidos_statuspedido_id FOREIGN KEY (status_id) REFERENCES public.pedidos_statuspedido(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- TOC entry 2261 (class 2606 OID 18976)
 -- Name: pedidos_pedidoproduto_pedido_id_ab5340e1_fk_pedidos_pedido_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1889,7 +2155,7 @@ ALTER TABLE ONLY public.pedidos_pedidoproduto
 
 
 --
--- TOC entry 2248 (class 2606 OID 18930)
+-- TOC entry 2260 (class 2606 OID 18930)
 -- Name: pedidos_pedidoproduto_produto_id_d564b867_fk_pedidos_produto_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1898,7 +2164,7 @@ ALTER TABLE ONLY public.pedidos_pedidoproduto
 
 
 --
--- TOC entry 2243 (class 2606 OID 18901)
+-- TOC entry 2256 (class 2606 OID 18901)
 -- Name: pedidos_produto_categoria_id_13275e73_fk_pedidos_c; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1907,7 +2173,7 @@ ALTER TABLE ONLY public.pedidos_produto
 
 
 --
--- TOC entry 2244 (class 2606 OID 18906)
+-- TOC entry 2257 (class 2606 OID 18906)
 -- Name: pedidos_produto_empresa_id_eddee74b_fk_pessoas_empresa_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1916,7 +2182,7 @@ ALTER TABLE ONLY public.pedidos_produto
 
 
 --
--- TOC entry 2237 (class 2606 OID 18829)
+-- TOC entry 2249 (class 2606 OID 18829)
 -- Name: pessoas_empresa_cidade_id_40bb748c_fk_outros_cidade_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1925,7 +2191,7 @@ ALTER TABLE ONLY public.pessoas_empresa
 
 
 --
--- TOC entry 2239 (class 2606 OID 18817)
+-- TOC entry 2251 (class 2606 OID 18817)
 -- Name: pessoas_funcionario_empresa_id_7e9d8835_fk_pessoas_empresa_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1934,7 +2200,7 @@ ALTER TABLE ONLY public.pessoas_funcionario
 
 
 --
--- TOC entry 2238 (class 2606 OID 18812)
+-- TOC entry 2250 (class 2606 OID 18812)
 -- Name: pessoas_funcionario_user_ptr_id_950559db_fk_auth_user_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1943,7 +2209,7 @@ ALTER TABLE ONLY public.pessoas_funcionario
 
 
 --
--- TOC entry 2406 (class 0 OID 0)
+-- TOC entry 2422 (class 0 OID 0)
 -- Dependencies: 6
 -- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
 --
@@ -1954,7 +2220,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2020-03-21 12:11:37 -03
+-- Completed on 2020-03-21 20:46:03 -03
 
 --
 -- PostgreSQL database dump complete

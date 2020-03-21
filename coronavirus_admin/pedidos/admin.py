@@ -14,9 +14,10 @@ class StatusPedidoAdmin(admin.ModelAdmin):
     search_fields = ['descricao', ]
     
 class ProdutoAdmin(admin.ModelAdmin):
-    list_display = ('descricao', 'empresa', 'valor')
-    list_filter = ('empresa', )   
+    list_display = ('descricao', 'empresa', 'ativo', 'valor')
+    list_filter = ('empresa', 'ativo')   
     search_fields = ['descricao', ]
+    
     
 class EnderecoTabularInline(admin.TabularInline):
     model = Endereco
@@ -53,4 +54,3 @@ admin.site.register(CategoriaProduto, CategoriaProdutoAdmin)
 admin.site.register(Produto, ProdutoAdmin)
 admin.site.register(Pedido, PedidoAdmin)
 admin.site.register(StatusPedido, StatusPedidoAdmin)
-

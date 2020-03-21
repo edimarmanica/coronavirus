@@ -9,7 +9,7 @@ from pedidos.admin import ProdutoAdmin
 # Register your models here.
 # Funcionário da empresa acessa apenas os produtos da empresa
 class ProdutoEmpresaAdmin(ProdutoAdmin):
-    fields = ('descricao', 'categoria', 'valor', 'imagem') 
+    fields = ('descricao', 'categoria', 'valor', 'ativo', 'imagem') 
      
     def get_queryset(self, request):
         funcionario = Funcionario.objects.get(pk=request.user.pk)

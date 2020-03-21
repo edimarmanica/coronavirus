@@ -5,7 +5,6 @@ from django.db import models
 from pessoas.models import Funcionario, Empresa, Cliente
 from outros.models import Cidade 
 
-
 # Create your models here.
 class CategoriaProduto(models.Model):
     descricao = models.CharField(max_length=30, verbose_name="Descrição")
@@ -34,6 +33,7 @@ class Produto(models.Model):
     descricao = models.CharField(max_length=100, verbose_name="Descrição")
     categoria = models.ForeignKey(CategoriaProduto, on_delete=models.PROTECT, related_name="categoria_produto")
     valor = models.FloatField()
+    ativo = models.BooleanField(default=True)
     imagem = models.ImageField(upload_to='produtos', blank=True, null=True)
     
     def __str__(self):
@@ -55,7 +55,7 @@ class Pedido(models.Model):
     horario_entrega = models.CharField(max_length=30, verbose_name="Horário de entrega", help_text="Descreva os horários disponíveis para você receber os produtos.")
     observacao_cliente = models.TextField(verbose_name="Observação do Cliente", blank=True, null=True)
     observacao_funcionario = models.TextField(verbose_name="Observação do Funcionário", blank=True, null=True)
-        
+            
     def __str__(self):
        return str(self.data) + " : " + self.cliente.nome
    
