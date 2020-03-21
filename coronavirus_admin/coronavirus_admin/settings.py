@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'pessoas',
     'outros',
     'pedidos',
+    'pedidos_empresa',
+    'django_cleanup' #exclui os arquivos de imagens quando a instância é excluída
 ]
 
 MIDDLEWARE = [
