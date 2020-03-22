@@ -3,6 +3,7 @@ from django.contrib import admin
 
 #classes do projeto
 from pessoas.models import Empresa, Cliente, Funcionario
+from pessoas.forms import FuncionarioForm
 
 # Register your models here.
 class EmpresaAdmin(admin.ModelAdmin):
@@ -11,7 +12,7 @@ class EmpresaAdmin(admin.ModelAdmin):
     search_fields = ['nome_fantasia', ]
 
 class FuncionarioAdmin(admin.ModelAdmin):
-    fields = ('empresa', 'nome', 'username', 'is_active', 'is_staff') 
+    form = FuncionarioForm #usado para adicionar o campo senha corretamente 
     list_display = ('nome', 'empresa') 
     list_filter = ('empresa', )  
     search_fields = ['nome', ]    

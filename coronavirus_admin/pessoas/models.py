@@ -46,6 +46,14 @@ class Funcionario(User):
     empresa = models.ForeignKey(Empresa, on_delete=models.PROTECT, related_name="empresa")
     
     User._meta.get_field('is_staff').default = True
+    User._meta.get_field('password').blank = True
+    
+    def save(self, force_insert=False, force_update=False):
+        if self.password:
+            self.set_password(self.password)
+        else:
+            self.password = Funcionario.objects.get(pk=self.pk).password
+        super(Funcionario, self).save(force_insert, force_update)
     
     def __str__(self):
        return self.nome
