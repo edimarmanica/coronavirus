@@ -7,7 +7,7 @@ from pessoas.forms import FuncionarioForm
 
 # Register your models here.
 class EmpresaAdmin(admin.ModelAdmin):
-    list_display = ('nome_fantasia', 'cidade', 'limite_produto')
+    list_display = ('nome_fantasia', 'cidade')
     list_filter = ('cidade', )   
     search_fields = ['nome_fantasia', ]
 

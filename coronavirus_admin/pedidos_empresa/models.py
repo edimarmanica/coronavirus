@@ -2,12 +2,12 @@
 from django.db import models
 
 #Classes do projeto
-from pedidos.models import Produto 
+from pedidos.models import Pedido 
 
 # Create your models here.
-class ProdutoEmpresa(Produto):
+class PedidoEmpresa(Pedido):
     class Meta:
         proxy = True
-        ordering = ["descricao", ] 
-        verbose_name="Produto da empresa" 
-        verbose_name_plural="Produtos da empresa" 
+        ordering = ["data", ] 
+        verbose_name="Pedido da empresa" 
+        verbose_name_plural="Pedidos da empresa" 

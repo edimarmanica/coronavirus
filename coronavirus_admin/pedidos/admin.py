@@ -2,7 +2,7 @@
 from django.contrib import admin, messages
 
 #Classe do projeto
-from pedidos.models import Pedido, Produto, CategoriaProduto, PedidoProduto, Endereco, StatusPedido 
+from pedidos.models import Pedido, Produto, CategoriaProduto, PedidoProduto, Endereco, StatusPedido, StatusProduto 
 
 # Register your models here.
 class CategoriaProdutoAdmin(admin.ModelAdmin):
@@ -13,29 +13,14 @@ class StatusPedidoAdmin(admin.ModelAdmin):
     list_display = ('descricao', )   
     search_fields = ['descricao', ]
     
-class ProdutoAdmin(admin.ModelAdmin):
-    list_display = ('descricao', 'empresa', 'ativo', 'valor')
-    list_filter = ('empresa', 'ativo')   
+class StatusProdutoAdmin(admin.ModelAdmin):
+    list_display = ('descricao', )   
     search_fields = ['descricao', ]
     
-    def save_model(self, request, obj, form, change):
-        #se o produto está ativo, tem que verificar se não ultrapassa o número máximo de produtos ativos por empresa
-        if obj.ativo:
-            nr_produtos_ativos = Produto.objects.filter(empresa=obj.empresa, ativo=True).count()
-            
-            if change:#se é update só precisa verificar se o produto era inativo antes 
-                if not(Produto.objects.get(pk=obj.pk).ativo): #se o produto era inativo
-                    if obj.empresa.limite_produto <= nr_produtos_ativos:
-                        messages.set_level(request, messages.ERROR)
-                        messages.error(request, 'O limite de produtos ativos para a sua empresa foi atingido. O produto não foi alterado!')
-                        return
-            else: #se é insert, tem que verificar
-                if obj.empresa.limite_produto <= nr_produtos_ativos:
-                    messages.set_level(request, messages.ERROR)
-                    messages.error(request, 'O limite de produtos ativos para a sua empresa foi atingido. O produto não foi inserido!')
-                    return
-        super(ProdutoAdmin, self).save_model(request, obj, form, change)
-    
+class ProdutoAdmin(admin.ModelAdmin):
+    list_display = ('descricao', 'situacao', 'categoria')
+    list_filter = ( 'situacao', 'categoria', )   
+    search_fields = ['descricao', ]  
     
 class EnderecoTabularInline(admin.TabularInline):
     model = Endereco
@@ -62,13 +47,16 @@ class PedidoProdutoTabularInline(admin.TabularInline):
         return self.extra
     
 class PedidoAdmin(admin.ModelAdmin):
-    list_display = ('data', 'empresa', 'cliente', 'valor_total', 'status')
+    fields = ('empresa', 'cliente', 'status', 'data', 'horario_entrega', 'observacao_cliente', 
+              'observacao_funcionario')
+    list_display = ('data', 'empresa', 'cliente', 'status')
     list_filter = ('empresa', 'cliente', 'status' )   
     search_fields = ['cliente', 'empresa',]
 
     inlines = [EnderecoTabularInline, PedidoProdutoTabularInline]
     
 admin.site.register(CategoriaProduto, CategoriaProdutoAdmin)
+admin.site.register(StatusProduto, StatusProdutoAdmin)
 admin.site.register(Produto, ProdutoAdmin)
 admin.site.register(Pedido, PedidoAdmin)
 admin.site.register(StatusPedido, StatusPedidoAdmin)

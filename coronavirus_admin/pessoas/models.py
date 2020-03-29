@@ -17,7 +17,6 @@ class Empresa(models.Model):
     nome_fantasia = models.CharField(max_length=30, verbose_name="Nome Fantasia")
     cidade = models.ForeignKey(Cidade, on_delete=models.PROTECT, related_name="cidade")
     imagem = models.ImageField(upload_to='empresas')
-    limite_produto = models.IntegerField(verbose_name="Número máximo de produtos", default=30)
     
     
     def __str__(self):
@@ -44,6 +43,7 @@ class Cliente(models.Model):
 class Funcionario(User):
     nome = models.CharField(max_length=50, verbose_name="Nome")
     empresa = models.ForeignKey(Empresa, on_delete=models.PROTECT, related_name="empresa")
+    hash = models.TextField(blank=True, null=True)
     
     User._meta.get_field('is_staff').default = True
     User._meta.get_field('password').blank = True
