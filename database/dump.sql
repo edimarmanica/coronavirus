@@ -5,7 +5,7 @@
 -- Dumped from database version 9.5.19
 -- Dumped by pg_dump version 9.5.19
 
--- Started on 2020-03-29 18:48:54 -03
+-- Started on 2020-04-05 18:47:59 -03
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1113,8 +1113,8 @@ SELECT pg_catalog.setval('public.auth_permission_id_seq', 76, true);
 --
 
 INSERT INTO public.auth_user VALUES (3, 'pbkdf2_sha256$150000$SxxiluGCb1hy$SUOgrtrnwsyLKhwJjA55R19eGhp897JE6SWmUGZLRd4=', NULL, false, 'maria', '', '', '', true, true, '2020-03-29 18:25:34.609813-03');
-INSERT INTO public.auth_user VALUES (1, 'pbkdf2_sha256$150000$GAQlsN4OTLzC$FqiJkekE+qkTgPVsvZaw0J+6AkG+ed5idTlMqQ0ExMI=', '2020-03-29 18:43:15.406319-03', true, 'admin', '', '', 'admin@gmail.com', true, true, '2020-03-29 18:15:30.744723-03');
 INSERT INTO public.auth_user VALUES (2, 'pbkdf2_sha256$150000$MD3VNyKp59YN$NgqPcmylbBr7Fdv4UxxFdtqS5ERzlmWyDfrb/Soy0P8=', '2020-03-29 18:44:19.761473-03', false, 'ana', '', '', '', true, true, '2020-03-29 18:25:17.740468-03');
+INSERT INTO public.auth_user VALUES (1, 'pbkdf2_sha256$150000$GAQlsN4OTLzC$FqiJkekE+qkTgPVsvZaw0J+6AkG+ed5idTlMqQ0ExMI=', '2020-04-05 18:43:44.062134-03', true, 'admin', '', '', 'admin@gmail.com', true, true, '2020-03-29 18:15:30.744723-03');
 
 
 --
@@ -1297,7 +1297,7 @@ SELECT pg_catalog.setval('public.django_migrations_id_seq', 30, true);
 -- Data for Name: django_session; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.django_session VALUES ('z1nh070dhfjjqvmq88wlschmtcbgioiu', 'YmJkNTI0M2RjMDk2NjYwMGYxODAxMTBiNWQ5ODRiY2JmODBlOGJmYjp7Il9hdXRoX3VzZXJfaGFzaCI6ImU5MTA2N2YyODg2ZTY5OGRmZjhmMTZhY2Q2NGIzMjc2N2E2ODIxODciLCJfYXV0aF91c2VyX2lkIjoiMiIsIl9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIn0=', '2020-04-12 18:44:19.7739-03');
+INSERT INTO public.django_session VALUES ('optpj71iqu5cg2fxol8ybrrjrmoaowfq', 'ZGYwODYzYmE5ZWM0MTIxM2Q2ZDU5OTgwMTljNjQxMDM3YWMzZTRjMTp7Il9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9pZCI6IjEiLCJfYXV0aF91c2VyX2hhc2giOiIyMDU4YmY4ZmJkZjhhYzcyZmRhNjFkZjFiMzY5ZTIyNDU2ZGY4ZDA3In0=', '2020-04-19 18:43:44.077097-03');
 
 
 --
@@ -2186,7 +2186,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2020-03-29 18:48:54 -03
+-- Completed on 2020-04-05 18:48:00 -03
 
 --
 -- PostgreSQL database dump complete
